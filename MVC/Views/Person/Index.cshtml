@@ -1,0 +1,210 @@
+﻿@{ Layout = "_Layout";
+    ViewBag.Title = "Person";
+}
+
+<div class="p-3">
+    <div class="row">
+        <h2 class="page-header">
+            Data
+            <small>Person</small>
+        </h2>
+    </div>
+    <div>
+        <a class="mb-3 btn btn-primary text-center" style="margin-bottom:10px" onclick="PopupForm('@Url.Action("AddOrEdit","Person")')">
+        <i class="fas fa-user-plus"></i> Add New</a>
+    </div>
+    <div>
+        <table id="table_id" class="table table-sm table-striped table-bordered m-2">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>NIK</th>
+                    <th>Name</th>
+                    <th>Last Name</th>
+                    <th>Phone</th>
+                    <th>Birth Date</th>
+                    <th>Salary</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>No</th>
+                    <th>NIK</th>
+                    <th>Name</th>
+                    <th>Last Name</th>
+                    <th>Phone</th>
+                    <th>Birth Date</th>
+                    <th>Salary</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        var Popup, dataTable;
+        $(document).ready(function () {
+            dataTable = $('#table_id').DataTable({
+                "filter": true,
+                "orderMulti": false,
+                "ajax": {
+                    "url": "Person/Get",
+                    "type": "get",
+                    "dataSrc": "result"
+                },
+                "columnDefs": [
+                    {
+                        "targets": [1, 3],
+                        "visible": false,
+                    },
+                    {
+                        "targets": [1, 4, 8],
+                        "orderable": false,
+                    }
+                ],
+                "columns": [
+                    {
+                        "data": null,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    { "data": 'nik' },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return row["firstName"] + ' ' + row["lastName"];
+                       Url}
+                    },
+                    { "data": 'lastName' },
+                    {
+                        "data": 'phone',
+                        "render": function (data, type, row) {
+                            var str = data;
+                            var re = /^0/;
+                            if (re.test(data)) {
+                                str = str.replace(re, "+62 ")
+                            }
+                            return str;
+                        }
+                    },
+                    {
+                        "data": 'birthDate',
+                        "render": function (data, type, row) {
+                            return moment(data).format('DD MMMM YYYY');
+                        }
+                    },
+                    { "data": 'salary' },
+                    { "data": 'email' },
+                    {
+                        data: "id", render: function (data, type, row, meta) {
+                            return '<a class="btn btn-sm btn-success" data-toggle="tooltip" data-placement="top" title="Edit" onclick="Get(\'' + row['nik'] + '\')"><i class ="far fa-edit"></i> Edit</a> ' +
+                                '<button class="btn btn-sm btn-danger" data-toggle="tooltip" data-placement="top" title="Delete" onclick="Delete(\'' + row['nik'] + '\')"><i class ="far fa-trash-alt"></i> Delete</button>'
+                        }
+                    }
+                ],
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'csv',
+                        exportOptions: {
+                            columns: [0, 2, 4, 5, 6, 7]
+                        }
+                    },
+                    {
+                        extend: 'excel',
+                        exportOptions: {
+                            columns: [0, 2, 4, 5, 6, 7]
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        exportOptions: {
+                            columns: [0, 2, 4, 5, 6, 7]
+                        }
+                    }
+                ]
+            });
+        });
+
+        function PopupForm(url) {
+            var formDiv = $('<div/>');
+            $.get(url)
+                .done(function (response) {
+                    formDiv.html(response);
+
+                Popup = formDiv.dialog({
+                    autoOpen: true,
+                    resizable: false,
+                    title: 'Fill Person Details',
+                    height: 500,
+                    width: 700,
+                    close: function () {
+                        Popup.dialog('destroy').remove();
+                    }
+
+                });
+            });
+        }
+
+        function SubmitForm(form) {
+            $.validator.unobtrusive.parse(form);
+            if($(form).valid()){
+                $.ajax({
+                    type : "POST",
+                    url : form.action,
+                    data : $(form).serialize(),
+                    success : function (data) {
+                        if(data.success)
+                        {
+                            Popup.dialog('close');
+                            dataTable.ajax.reload();
+
+                            $.notify(data.message,{
+                                globalPosition :"top center",
+                                className : "success"
+                            })
+
+                        }
+                    }
+                });
+            }
+            return false;
+        }
+        
+        function Delete(nik) {
+            swal({
+                title: "Are you sure?",
+                text: "Once deleted, you will not be able to recover",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true
+            }).then((willDelete) => {
+                if (willDelete) {
+                    $.ajax({
+                        type: "POST",
+                        url: "Person/Delete",
+                        data: { 'key': nik },
+                        success: function (data) {
+                            if (data.success) {
+                                toastr.success(data.message);
+                                dataTable.ajax.reload();
+                            }
+                            else {
+                                toastr.error(data.message);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}
