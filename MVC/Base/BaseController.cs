@@ -27,18 +27,18 @@ namespace MVC.Base
 
         public async Task<JsonResult> Get()
         {
-            using var response = await httpClient.GetAsync(typeof(Entity).Name);
+            var response = await httpClient.GetAsync(typeof(Entity).Name);
             string apiResponse = await response.Content.ReadAsStringAsync();
-            var entity = JsonConvert.DeserializeObject<ResponseVM<Entity>>(apiResponse);
-            return new JsonResult(entity);
+            var result = JsonConvert.DeserializeObject<ResponseVM<IEnumerable<Entity>>>(apiResponse);
+            return new JsonResult(result);
         }
 
-        public async Task<JsonResult> GetBy(Key key)
+        public async Task<JsonResult> GetById(Key key)
         {
             var response = await httpClient.GetAsync(typeof(Entity).Name + "/" + key);
             string apiResponse = await response.Content.ReadAsStringAsync();
-            var entity = JsonConvert.DeserializeObject<ResponseVM<Entity>>(apiResponse);
-            return new JsonResult(entity);
+            var result = JsonConvert.DeserializeObject<ResponseVM<Entity>>(apiResponse);
+            return new JsonResult(result);
         }
 
         [HttpPost]
@@ -62,12 +62,12 @@ namespace MVC.Base
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(Key key)
+        public async Task<JsonResult> Delete(Key key)
         {
             using var response = await httpClient.DeleteAsync(typeof(Entity).Name + '/' + key);
             string apiResponse = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<ResponseVM<Entity>>(apiResponse);
-            return new JsonResult(result);
+            return Json(result);
         }
     }
 }

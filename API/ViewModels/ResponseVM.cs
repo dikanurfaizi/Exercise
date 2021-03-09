@@ -10,6 +10,6 @@ namespace API.ViewModels
         public string Status { get; set; }
 
         public string Message { get; set; }
-        public IEnumerable<Entity> Result { get; set; }
+        public Entity Result { get; set; }
     }
 }

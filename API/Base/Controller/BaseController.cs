@@ -53,14 +53,14 @@ namespace API.Base.Controller
                 return NotFound(new { status = HttpStatusCode.NotFound, message = "Data Tidak Ditemukan" });
             }
         }
-        
+
         [HttpPost]
         public ActionResult Post(Entity entity)
         {
             var result = repository.Insert(entity);
             if (result > 0)
             {
-                return Ok(new { status = HttpStatusCode.OK, result, message = "Berhasil Membuat Data Baru" });
+                return Ok(new { status = HttpStatusCode.OK, result = "", message = "Berhasil Membuat Data Baru" });
             }
             else
             {
@@ -68,13 +68,13 @@ namespace API.Base.Controller
             }
         }
 
-        [HttpDelete]
-        public ActionResult Delete(Entity entity)
+        [HttpDelete("{key}")]
+        public ActionResult Delete(Key key)
         {
-            var result = repository.Delete(entity);
+            var result = repository.Delete(key);
             if (result > 0)
             {
-                return Ok(new { status = HttpStatusCode.OK, result, message = "Berhasil Menghapus Data Baru" });
+                return Ok(new { status = HttpStatusCode.OK, result = "", message = "Berhasil Menghapus Data Baru" });
             }
             else
             {
@@ -94,7 +94,7 @@ namespace API.Base.Controller
 
             if (result > 0)
             {
-                return Ok(new { status = HttpStatusCode.OK, result, message = "Berhasil Update Data" });
+                return Ok(new { status = HttpStatusCode.OK, result = "", message = "Berhasil Update Data" });
             }
             else
             {
@@ -103,4 +103,3 @@ namespace API.Base.Controller
         }
     }
 }
-

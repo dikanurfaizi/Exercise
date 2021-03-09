@@ -20,8 +20,9 @@ namespace API.Repository
             entities = myContext.Set<Entity>();
         }
 
-        public int Delete(Entity entity)
+        public int Delete(Key key)
         {
+            var entity = entities.Find(key);
             if (entity == null)
                 throw new ArgumentNullException("entity");
             entities.Remove(entity);
